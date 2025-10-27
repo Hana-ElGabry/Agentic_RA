@@ -53,7 +53,7 @@ You should see: `crewai v0.102.0 - crewai` (or similar version).[1]
 - Log in with your Google account[5]
 - Click **"Get API key"** → **"Create API key"**[5]
 - Copy your API key (starts with something like `AIza...`)[4][3]
-
+[AIzaSyDFv62r34ViLIcQdNw0gYaFEERdWMnnCDI]
 **This is completely free** - no credit card required.[6][7][8]
 
 ## Step 5: Create Your CrewAI Project
