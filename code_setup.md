@@ -10,374 +10,196 @@ python3 --version
 
 You need Python 3.10 to 3.13. If you need to update, download from python.org/downloads.[1]
 
-## Step 2: Install UV Package Manager
+UV installation failed. **Skip UV entirely and use pip** - this is faster for your hackathon anyway. Here's what to do:[1][2]
 
-UV is CrewAI's required dependency manager.[2][1]
+## Direct Solution: Install CrewAI with pip
 
-**For Windows (in PowerShell):**
+**Step 1: Verify Python and pip are working:**
+
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+python --version
+pip --version
 ```
 
-**For macOS/Linux (in Terminal):**
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+You should see Python 3.10+.[2]
+
+**Step 2: Install CrewAI directly with pip:**
+
+```powershell
+pip install crewai
 ```
 
-After installation, update your shell :[1]
-```bash
-uv tool update-shell
+**Step 3: Install CrewAI tools (includes extras):**
+
+```powershell
+pip install 'crewai[tools]'
 ```
 
-Close and reopen VSCode terminal to apply changes.[1]
+Wait for installation to complete.[2]
 
-## Step 3: Install CrewAI CLI
+**Step 4: Verify installation:**
 
-In VSCode terminal, run :[1]
-
-```bash
-uv tool install crewai
+```powershell
+python -c "import crewai; print(crewai.__version__)"
 ```
 
-Verify installation :[1]
-```bash
-uv tool list
+If this prints a version number, you're ready to go.[2]
+
+## Create Your Project Manually (No UV CLI Needed)
+
+Since you can't use `crewai create crew`, create your project structure manually :[1][2]
+
+**Step 1: Create folders:**
+
+```powershell
+mkdir src
+mkdir src\research_assistant
+mkdir src\research_assistant\config
+mkdir src\research_assistant\tools
 ```
 
-You should see: `crewai v0.102.0 - crewai` (or similar version).[1]
+**Step 2: Create your main Python file:**
 
-## Step 4: Get Gemini API Key
-
-**Go to Google AI Studio:**
-- Visit: https://aistudio.google.com/[3][4][5]
-- Log in with your Google account[5]
-- Click **"Get API key"** → **"Create API key"**[5]
-- Copy your API key (starts with something like `AIza...`)[4][3]
-
-**This is completely free** - no credit card required.[6][7][8]
-
-## Step 5: Create Your CrewAI Project
-
-In VSCode terminal, navigate to where you want your project :[1]
-
-```bash
-cd C:\Users\YourName\Documents  # Windows
-# or
-cd ~/Documents  # macOS/Linux
-```
-
-Create your project :[9][1]
-```bash
-crewai create crew research_assistant
-```
-
-This creates a complete project structure :[9][1]
-```
-research_assistant/
-├── .gitignore
-├── .env                    # Your API keys go here
-├── pyproject.toml
-├── README.md
-└── src/
-    └── research_assistant/
-        ├── main.py         # Run from here
-        ├── crew.py         # Define your crew
-        ├── config/
-        │   ├── agents.yaml # Agent definitions
-        │   └── tasks.yaml  # Task definitions
-        └── tools/
-            └── custom_tool.py
-```
-
-## Step 6: Open Project in VSCode
-
-Open the newly created project :[2]
-
-```bash
-cd research_assistant
-code .
-```
-
-This opens the project folder in VSCode.[2]
-
-## Step 7: Configure Gemini API Key
-
-Open the `.env` file in VSCode (it's in the root folder).[3][4]
-
-Add your Gemini API key :[3]
-
-```bash
-# Required - use your actual API key
-GEMINI_API_KEY=AIza...your-actual-key-here
-
-# Optional: specify default model
-MODEL=gemini/gemini-2.0-flash
-```
-
-**Important:** Never commit `.env` to Git - it's already in `.gitignore`.[3]
-
-## Step 8: Install Project Dependencies
-
-In VSCode terminal (make sure you're in the `research_assistant` folder) :[1]
-
-```bash
-crewai install
-```
-
-This installs all required dependencies including Google Gemini support.[3][1]
-
-## Step 9: Configure Agents to Use Gemini
-
-Open `src/research_assistant/config/agents.yaml` in VSCode.[4][9][3]
-
-Edit it to look like this:
-
-```yaml
-research_agent:
-  role: >
-    Research Paper Finder
-  goal: >
-    Find the most relevant academic papers on {research_topic}
-  backstory: >
-    You are an expert at searching academic databases and finding 
-    high-quality research papers. You use Semantic Scholar and arXiv 
-    to find the best papers.
-  llm: gemini/gemini-2.0-flash
-  verbose: true
-
-analysis_agent:
-  role: >
-    Research Paper Analyst
-  goal: >
-    Analyze and summarize academic papers to extract key findings
-  backstory: >
-    You are skilled at reading research papers and extracting the 
-    most important information, methodologies, and conclusions.
-  llm: gemini/gemini-2.0-flash
-  verbose: true
-
-quiz_agent:
-  role: >
-    Knowledge Assessment Specialist
-  goal: >
-    Create quiz questions and identify knowledge gaps
-  backstory: >
-    You create insightful questions to test understanding and 
-    identify areas where the user needs more information.
-  llm: gemini/gemini-2.0-flash
-  verbose: true
-```
-
-## Step 10: Configure Tasks
-
-Open `src/research_assistant/config/tasks.yaml` :[4][9]
-
-```yaml
-research_task:
-  description: >
-    Search for the top 5 most relevant academic papers about {research_topic}.
-    Use Semantic Scholar or arXiv APIs to find papers with high citation counts.
-    Return paper titles, authors, abstracts, and links.
-  expected_output: >
-    A list of 5 papers with complete metadata including titles, authors, 
-    publication year, abstract, and PDF links.
-  agent: research_agent
-
-analysis_task:
-  description: >
-    Read and analyze the papers found by the research agent.
-    Extract key findings, methodologies, and conclusions from each paper.
-    Create a comprehensive summary highlighting common themes.
-  expected_output: >
-    A structured summary of key findings across all papers, organized by theme,
-    with citations to specific papers.
-  agent: analysis_agent
-  context:
-    - research_task
-
-quiz_task:
-  description: >
-    Based on the summary, create 5 multiple-choice questions to test 
-    understanding. After the user answers, identify knowledge gaps and 
-    suggest areas for deeper study.
-  expected_output: >
-    5 quiz questions with answer options, correct answers, and a knowledge 
-    gap analysis based on incorrect responses.
-  agent: quiz_agent
-  context:
-    - analysis_task
-```
-
-## Step 11: Verify Gemini Integration in crew.py
-
-Open `src/research_assistant/crew.py` :[4]
-
-The file should already import the LLM class. If you want to explicitly set Gemini, add this at the top :[4][3]
+In VSCode, create `main.py` in the root folder with this code :[2]
 
 ```python
-from crewai import Agent, Crew, Process, Task, LLM
-from crewai.project import CrewBase, agent, crew, task
+from crewai import Agent, Task, Crew, LLM
+import os
 
-# Optional: explicitly create Gemini LLM instance
-gemini_llm = LLM(
-    model="gemini/gemini-2.0-flash",
-    temperature=0.7
+# Set your Gemini API key
+os.environ["GEMINI_API_KEY"] = "your-api-key-here"
+
+# Create Gemini LLM
+gemini_llm = LLM(model="gemini/gemini-2.0-flash")
+
+# Define agents
+research_agent = Agent(
+    role="Research Paper Finder",
+    goal="Find relevant academic papers on {topic}",
+    backstory="Expert at searching academic databases",
+    llm=gemini_llm,
+    verbose=True
 )
+
+analysis_agent = Agent(
+    role="Research Analyst",
+    goal="Analyze and summarize papers",
+    backstory="Skilled at extracting key findings",
+    llm=gemini_llm,
+    verbose=True
+)
+
+quiz_agent = Agent(
+    role="Knowledge Assessment Specialist",
+    goal="Create quiz questions and identify knowledge gaps",
+    backstory="Expert at creating insightful questions",
+    llm=gemini_llm,
+    verbose=True
+)
+
+# Define tasks
+research_task = Task(
+    description="Search for 5 papers about {topic}",
+    expected_output="List of 5 papers with titles and abstracts",
+    agent=research_agent
+)
+
+analysis_task = Task(
+    description="Analyze the papers and create a summary",
+    expected_output="Structured summary of key findings",
+    agent=analysis_agent,
+    context=[research_task]
+)
+
+quiz_task = Task(
+    description="Create 5 quiz questions based on the summary",
+    expected_output="5 questions with answers and gap analysis",
+    agent=quiz_agent,
+    context=[analysis_task]
+)
+
+# Create crew
+crew = Crew(
+    agents=[research_agent, analysis_agent, quiz_agent],
+    tasks=[research_task, analysis_task, quiz_task],
+    verbose=True
+)
+
+# Run
+if __name__ == "__main__":
+    result = crew.kickoff(inputs={"topic": "multi-agent AI systems"})
+    print("\n\n=== FINAL RESULT ===")
+    print(result)
 ```
 
-## Step 12: Test Your Setup
+**Step 3: Get your Gemini API key:**
 
-Run your crew :[4][1]
+1. Go to https://aistudio.google.com/
+2. Click "Get API key"
+3. Copy your key
+4. Replace `"your-api-key-here"` in the code above[3][4]
 
-```bash
-crewai run
+**Step 4: Run your project:**
+
+```powershell
+python main.py
 ```
 
-You should see output like :[4]
-```
---- Starting Research Assistant Crew ---
-[research_agent] Task: Search for papers...
-[research_agent] Using model: gemini/gemini-2.0-flash
-...
+This should work immediately.[1][2]
+
+## If You Get Errors
+
+**Error: "No module named 'tiktoken'"**[2]
+
+```powershell
+pip install 'crewai[embeddings]'
 ```
 
-## Step 13: Customize for Your Research Assistant
+**Error: "Failed building wheel"**[5][2]
 
-To add paper search functionality, create a custom tool in `src/research_assistant/tools/custom_tool.py` :[4]
+```powershell
+pip install --upgrade pip
+pip install tiktoken --prefer-binary
+```
+
+**Error: "uvloop" issues (Windows)**[6]
+
+This is a known Windows issue. Add this to the top of your `main.py`:
 
 ```python
-from crewai.tools import BaseTool
-from typing import Type
-from pydantic import BaseModel, Field
-import requests
-
-class PaperSearchInput(BaseModel):
-    """Input for paper search tool"""
-    query: str = Field(..., description="Research topic to search for")
-    limit: int = Field(5, description="Number of papers to return")
-
-class SemanticScholarTool(BaseTool):
-    name: str = "Semantic Scholar Search"
-    description: str = "Search for academic papers using Semantic Scholar API"
-    args_schema: Type[BaseModel] = PaperSearchInput
-
-    def _run(self, query: str, limit: int = 5) -> str:
-        """Search Semantic Scholar for papers"""
-        url = "https://api.semanticscholar.org/graph/v1/paper/search"
-        params = {
-            "query": query,
-            "limit": limit,
-            "fields": "title,authors,abstract,year,citationCount,url"
-        }
-        
-        response = requests.get(url, params=params)
-        
-        if response.status_code == 200:
-            papers = response.json().get("data", [])
-            result = []
-            
-            for paper in papers:
-                result.append(f"""
-Title: {paper.get('title')}
-Authors: {', '.join([a['name'] for a in paper.get('authors', [])])}
-Year: {paper.get('year')}
-Citations: {paper.get('citationCount')}
-Abstract: {paper.get('abstract', 'No abstract available')}
-URL: {paper.get('url')}
----
-""")
-            
-            return "\n".join(result)
-        else:
-            return f"Error: Failed to fetch papers (status {response.status_code})"
+import sys
+if sys.platform == 'win32':
+    import asyncio
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 ```
 
-Then register the tool in your agent configuration by editing `crew.py` :[4]
+## Why This is Better for Your Hackathon
 
-```python
-from research_assistant.tools.custom_tool import SemanticScholarTool
+**No UV complications** - You're coding within 5 minutes instead of fighting installation issues.[1][2]
 
-@agent
-def research_agent(self) -> Agent:
-    return Agent(
-        config=self.agents_config['research_agent'],
-        tools=[SemanticScholarTool()],  # Add your custom tool
-        verbose=True
-    )
-```
+**Single file to start** - All code in one `main.py` makes debugging faster.[2]
 
-## Step 14: Run Complete Workflow
+**Easier for teammates** - They just need to `pip install crewai` and run your script.[1][2]
 
-Test with a research topic :[4]
+**Less abstraction** - You see exactly what each agent does, making it easier to customize.[2]
 
-```bash
-crewai run
-```
+## Next Steps
 
-When prompted, enter a research topic like: `"multi-agent systems in healthcare"`
+1. **Test the basic setup** - Run `main.py` with the example above
+2. **Add Semantic Scholar API** - Create a custom tool in the research agent
+3. **Build your demo** - Focus on working functionality, not perfect project structure
 
-## Troubleshooting Common Issues
+You're now ready to code without UV blocking you! For a 1-day hackathon, **working code beats perfect setup** every time.[7][8][1]
 
-**"Command not found: crewai"**[1]
-- Run `uv tool update-shell` and restart terminal
-
-**"GEMINI_API_KEY not found"**[3]
-- Verify `.env` file has the correct key format
-- Make sure you're in the project root directory when running
-
-**"Rate limit exceeded"**[7][6]
-- Gemini free tier: 15 RPM, 1,500 RPD[6][7]
-- Add delays between agent calls if needed
-
-**"Module not found"**[1]
-- Run `crewai install` again
-- If you need additional packages: `uv add package-name`[1]
-
-## Quick Reference Commands
-
-```bash
-# Create new project
-crewai create crew project_name
-
-# Install dependencies
-crewai install
-
-# Add new package
-uv add package-name
-
-# Run your crew
-crewai run
-
-# Update CrewAI
-uv tool install crewai --upgrade
-```
-
-## Verify Everything Works
-
-Your terminal should show :[4]
-1. Agents activating with Gemini model
-2. API calls being made
-3. Results from each agent
-4. Final output
-
-You now have a fully functional CrewAI setup with Gemini API running in VSCode! The entire setup is **completely free** using Google's generous Gemini API limits.[8][7][6]
-
-[1](https://docs.crewai.com/en/installation)
-[2](https://lablab.ai/t/developing-intelligent-agents-with-crewai)
+[1](https://www.reddit.com/r/crewai/comments/1hrb4li/how_do_i_install_this_on_my_laptop/)
+[2](https://pypi.org/project/crewai/)
 [3](https://docs.crewai.com/en/concepts/llms)
 [4](https://ai.google.dev/gemini-api/docs/crewai-example)
-[5](https://towardsai.net/p/l/building-ai-agents-with-crew-ai-using-google-gemini-groq-llama3)
-[6](https://blog.laozhang.ai/api-guides/gemini-api-free-tier/)
-[7](https://ai.google.dev/gemini-api/docs/rate-limits)
-[8](https://ai.google.dev/gemini-api/docs/pricing)
-[9](https://docs.crewai.com/en/guides/crews/first-crew)
-[10](https://www.youtube.com/watch?v=WUkQJiAlGUM)
-[11](https://www.youtube.com/watch?v=07vd9dWYjyI)
-[12](https://community.crewai.com/t/automated-project-notebook-gemini/2441)
-[13](https://docs.crewai.com/en/quickstart)
-[14](https://github.com/google-gemini/crewai-quickstart)
-[15](https://www.youtube.com/watch?v=70hOObbjwFQ)
-[16](https://aiagentinsider.ai/crewai-review-complete-2025-guide/)
-[17](https://www.youtube.com/watch?v=SuTMYly8xXg)
-[18](https://community.deeplearning.ai/t/total-beginner-how-to-install-crew-ai/838194)
-[19](https://www.linkedin.com/posts/khanh-vy-nguyen0331_crewai-dockerdesktop-vscode-activity-7320079604638011393-g6wi)
+[5](https://github.com/crewAIInc/crewAI/issues/1687)
+[6](https://community.crewai.com/t/error-installing-crewai-in-windows/2640)
+[7](https://tecknoworks.com/how-to-win-a-hackathon/)
+[8](https://stories.mlh.io/10-tips-to-win-your-next-hackathon-5afc7d97db85)
+[9](https://docs.crewai.com/en/installation)
+[10](https://www.youtube.com/watch?v=70hOObbjwFQ)
+[11](https://github.com/crewAIInc/crewAI/issues/2409)
+[12](https://community.deeplearning.ai/t/installing-crewai-in-windows-anaconda/811796)
