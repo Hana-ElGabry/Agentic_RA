@@ -1,0 +1,21 @@
+research_task:
+  description: >
+    Search for the top 5 most relevant academic papers about {research_topic}.
+    Use Semantic Scholar or arXiv APIs to find papers with high citation counts.
+    Return paper titles, authors, abstracts, and links.
+  expected_output: >
+    A list of 5 papers with complete metadata including titles, authors, 
+    publication year, abstract, and PDF links.
+  agent: research_agent
+
+analysis_task:
+  description: >
+    Read and analyze the papers found by the research agent.
+    Extract key findings, methodologies, and conclusions from each paper.
+    Create a comprehensive summary highlighting common themes.
+  expected_output: >
+    A structured summary of key findings across all papers, organized by theme,
+    with citations to specific papers.
+  agent: analysis_agent
+  context:
+    - research_task
