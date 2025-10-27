@@ -1,4 +1,17 @@
 Here's your complete, detailed step-by-step guide to set up CrewAI with Gemini API in VSCode:
+-------------------------
+1- upgrade pip
+2-  pip install crewai
+3-  pip install 'crewai[embeddings]'
+4-  pip install -q -U google-genai
+5-  pyrhon main.py
+-------------------------
+
+
+
+
+
+
 
 ## Step 1: Check Python Version
 
